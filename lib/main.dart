@@ -38,7 +38,12 @@ class _WebSocketExampleState extends State<WebSocketExample> {
   late IO.Socket socket;
   String notificationMessage = "No notifications yet";
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-
+  int seconds=0;
+  Duration _duration = Duration(seconds: 0);
+  // Define a Timer object
+  Timer? _timer;
+  // Define a variable to store the current countdown value
+  int _countdownValue = 0;
   @override
   void initState() {
     super.initState();
@@ -54,17 +59,38 @@ class _WebSocketExampleState extends State<WebSocketExample> {
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+
+  double checkDouble(dynamic value) {
+    if (value is String) {
+      return double.parse(value);
+    } else if (value is int)   {
+      return value.toDouble();
+    }else{
+    return value;
+    }
+  }
+
   void connectToSocket() {
-    socket = IO.io('http://192.168.0.6:3000', <String, dynamic>{'transports': ['websocket']});
+    socket = IO.io('http://192.168.60.1:3000', <String, dynamic>{'transports': ['websocket']});
 
     socket.onConnect((_) {
       print('Conectado con socket id: ' + socket.id.toString());
     });
 
+    int? checkInt(dynamic value) {
+      if(value is int) return value;
+      if(value is double) return value.toInt();
+      if(value is String) return int.tryParse(value);
+      return null;
+    }
     socket.on('notificacionAccidente_1', (data) {
       setState(() {
         notificationMessage = data['mensaje'];
+        seconds= checkInt(checkDouble(data["time_out"]) /1000)!;
+        _duration = Duration(seconds: seconds);
+        print(_duration.inSeconds);
       });
+      startTimer();
       showLocalNotification(
         title: 'Accidente Detectado',
         body: data['mensaje'],
@@ -148,7 +174,23 @@ class _WebSocketExampleState extends State<WebSocketExample> {
   @override
   void dispose() {
     socket.dispose();
+    _timer?.cancel();
     super.dispose();
+  }
+  void startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_duration.inSeconds <= 0) {
+        // Countdown is finished
+        _timer?.cancel();
+        // Perform any desired action when the countdown is completed
+      } else {
+        // Update the countdown value and decrement by 1 second
+        setState(() {
+          _countdownValue = _duration.inSeconds;
+          _duration = _duration - Duration(seconds: 1);
+        });
+      }
+    });
   }
 
   @override
@@ -161,6 +203,7 @@ class _WebSocketExampleState extends State<WebSocketExample> {
         child: Column(
           children: [
             Text(notificationMessage),
+            Text('Countdown: $_countdownValue'),
             OutlinedButton(
               onPressed: () {
                 showLocalNotification(
@@ -212,7 +255,7 @@ class MyTaskHandler extends TaskHandler {
   }
 
   void _connectToSocket() {
-    socket = IO.io('http://192.168.0.6:3000', <String, dynamic>{'transports': ['websocket']});
+    socket = IO.io('http://192.168.60.1:3000', <String, dynamic>{'transports': ['websocket']});
 
     socket.onConnect((_) {
       print('Reconectado con socket id: ' + socket.id.toString());
@@ -221,6 +264,7 @@ class MyTaskHandler extends TaskHandler {
     // Escuchar eventos desde el WebSocket y mostrar notificaciones locales
     socket.on('notificacionAccidente_1', (data) {
       // Mostrar la notificación local
+
       showLocalNotification(
         title: 'Accidente Detectado',
         body: data['mensaje'],
