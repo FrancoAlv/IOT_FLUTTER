@@ -5,8 +5,14 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
   FlutterForegroundTask.initCommunicationPort();
 }
