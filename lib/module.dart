@@ -19,5 +19,6 @@ Future<bool> modulo() async {
   final preferences= await SharedPreferences.getInstance();
   //services
   injector.registerSingleton(() => preferences);
+
   return true;
 }

@@ -26,6 +26,10 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
+
+def googleMapsApiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY")
+
+
 android {
     namespace = "com.example.app_iot_web"
     compileSdk = flutter.compileSdkVersion
@@ -45,6 +49,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = googleMapsApiKey
     }
 
     buildTypes {
