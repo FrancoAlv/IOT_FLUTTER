@@ -1,6 +1,13 @@
+import 'dart:collection';
+import 'dart:convert';
+
+import 'package:app_iot_web/views/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:injector/injector.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -22,22 +29,55 @@ class _LoginViewState extends State<LoginView> {
     });
   }
 
-  void _login() async {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await _auth.signInWithEmailAndPassword(
+        final response = await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
+
+        // Limpiar SharedPreferences y almacenar el correo
+        Injector.appInstance.get<SharedPreferences>().clear();
+        Injector.appInstance.get<SharedPreferences>().setString(Consts.keycorreo, _emailController.text.trim());
+
+        // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Inicio de sesión exitoso')),
         );
-        // Navegar a la pantalla principal
+
+        // Redirigir a la pantalla principal
+        context.go("/");
+      } on FirebaseAuthException catch (e) {
+        String errorMessage = _getFirebaseAuthErrorMessage(e.code);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          const SnackBar(content: Text('Ha ocurrido un error. Inténtelo nuevamente.')),
         );
       }
+    }
+  }
+
+  // Función para traducir códigos de error de Firebase a mensajes amigables
+  String _getFirebaseAuthErrorMessage(String errorCode) {
+    switch (errorCode) {
+      case 'invalid-email':
+        return 'El correo electrónico no es válido.';
+      case 'user-disabled':
+        return 'La cuenta ha sido deshabilitada. Contacte al soporte.';
+      case 'user-not-found':
+        return 'No se ha encontrado una cuenta con este correo.';
+      case 'wrong-password':
+        return 'La contraseña es incorrecta. Inténtelo de nuevo.';
+      case 'too-many-requests':
+        return 'Demasiados intentos. Espere un momento e intente de nuevo.';
+      case 'network-request-failed':
+        return 'No se ha podido conectar a la red. Verifique su conexión a Internet.';
+      default:
+        return 'Ha ocurrido un error desconocido. Inténtelo de nuevo.';
     }
   }
 

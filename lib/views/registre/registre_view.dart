@@ -15,6 +15,8 @@ class _RegistreViewState extends State<RegistreView> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _apellidofirtsController = TextEditingController();
+  final TextEditingController _apellidosecondController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _codigoEquipoController = TextEditingController();
@@ -32,8 +34,8 @@ class _RegistreViewState extends State<RegistreView> {
 
         // Si el registro en Firebase es exitoso, realiza la solicitud HTTP
         if (userCredential.user != null) {
-          _auth.signOut();
-         final response= await _sendUserData();
+         await _auth.signOut();
+         final response= await _sendUserData(userCredential.user?.uid);
          if (response){
            ScaffoldMessenger.of(context).showSnackBar(
              const SnackBar(content: Text('Usuario registrado exitosamente')),
@@ -53,13 +55,16 @@ class _RegistreViewState extends State<RegistreView> {
     }
   }
 
-  Future<bool> _sendUserData() async {
+  Future<bool> _sendUserData(String? uid_codigo) async {
     const String url = "${Consts.urlbase}/usuario/crear"; // Cambia esta URL a la de tu API
 
     final Map<String, dynamic> userData = {
       "nombre": _nombreController.text.trim(),
       "correo": _correoController.text.trim(),
       "telefono": _telefonoController.text.trim(),
+      "uid_codigo":uid_codigo,
+      "apellido_firts":_apellidofirtsController.text.trim(),
+      "apellido_second": _apellidosecondController.text.trim(),
       "codigo_equipo_iot": _codigoEquipoController.text.trim(),
     };
 
@@ -121,6 +126,10 @@ class _RegistreViewState extends State<RegistreView> {
                   ),
                   const SizedBox(height: 20),
                   _buildTextField(_nombreController, 'Nombre Completo'),
+                  const SizedBox(height: 20),
+                  _buildTextField(_apellidofirtsController, 'Primer Apellido'),
+                  const SizedBox(height: 20),
+                  _buildTextField(_apellidosecondController, 'Segundo Apellido'),
                   const SizedBox(height: 15),
                   _buildEmailField(_correoController, 'Correo Electrónico'),
                   const SizedBox(height: 15),

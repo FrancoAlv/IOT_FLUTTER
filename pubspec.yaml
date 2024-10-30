@@ -47,6 +47,8 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.2.2
   http: ^1.2.2
+  fl_chart: ^0.68.0
+  injector: ^3.0.0
 
 dev_dependencies:
   flutter_test:
