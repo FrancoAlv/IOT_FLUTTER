@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:app_iot_web/router/main_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -14,7 +15,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const MyApp());
-  FlutterForegroundTask.initCommunicationPort();
+  //FlutterForegroundTask.initCommunicationPort();
 }
 
 class MyApp extends StatelessWidget {
@@ -22,13 +23,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter WebSocket Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF4A90E2)),
         useMaterial3: true,
+
       ),
-      home: const WebSocketExample(),
+      debugShowCheckedModeBanner: false,
+      routerConfig: MainRouter.router,
     );
   }
 }
