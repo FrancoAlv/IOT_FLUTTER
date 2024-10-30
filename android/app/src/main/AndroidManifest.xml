@@ -13,6 +13,7 @@
     <application
         android:label="app_iot_web"
         android:name="${applicationName}"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher">
         <service
             android:name="com.pravera.flutter_foreground_task.service.ForegroundService"

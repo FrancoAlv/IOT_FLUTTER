@@ -14,24 +14,35 @@ sealed class MainRouter {
   abstract  String path;
 
   static GoRouter router = GoRouter(
-    redirect: (context, state) {
-      final isLoggedIn = FirebaseAuth.instance.currentUser != null;
-      final loggingIn = state.path == '/login';
+      redirect: (context, state) {
+        // Estado de autenticación del usuario
+        final isLoggedIn = FirebaseAuth.instance.currentUser != null;
 
-      if (!isLoggedIn && !loggingIn) {
-        // Si el usuario no está autenticado y no está en la página de login, redirigir a login
-        return '/login';
-      } else if (isLoggedIn && loggingIn) {
-        // Si el usuario está autenticado y está en la página de login, redirigir a init
-        return '/';
-      }
-      // En cualquier otro caso, no hacer redirección
-      return null;
-    },
+        // Rutas Públicas (accesibles sin autenticación)
+        final publicRoutes = ['/login', '/registre'];
+
+        // Rutas Protegidas (requieren autenticación)
+        final protectedRoutes = ['/', '/dashboard', '/profile'];
+
+        // Verifica si el usuario está en una ruta pública
+        final isPublicRoute = publicRoutes.contains(state.fullPath);
+        // Verifica si el usuario está en una ruta protegida
+        final isProtectedRoute = protectedRoutes.contains(state.fullPath);
+
+        if (!isLoggedIn && isProtectedRoute) {
+          // Redirige a /login si el usuario no está autenticado y trata de acceder a una ruta protegida
+          return '/login';
+        } else if (isLoggedIn && isPublicRoute) {
+          // Redirige a la página de inicio si el usuario está autenticado y está en una ruta pública
+          return '/';
+        }
+
+        // Si está en una ruta permitida según el estado de autenticación, no hacer redirección
+        return state.fullPath;
+      },
     routes: <RouteBase>[
       GoRoute(
         path: '/',
-
         builder: (BuildContext context, GoRouterState state) {
           final _auth = FirebaseAuth.instance;
           if (_auth.currentUser!=null){
@@ -48,14 +59,16 @@ sealed class MainRouter {
               return  LoginView();
             },
           ),
-          GoRoute(
-            path: 'registre',
-            builder: (BuildContext context, GoRouterState state) {
 
-              return  RegistreView();
-            },
-          ),
         ],
+
+      ),
+      GoRoute(
+        path: '/registre',
+        builder: (BuildContext context, GoRouterState state) {
+
+          return  RegistreView();
+        },
       ),
     ],
   );
