@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:injector/injector.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
@@ -28,8 +29,36 @@ class _LoginViewState extends State<LoginView> {
       _obscureText = !_obscureText;
     });
   }
+  void showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      useSafeArea: true,
+      // El usuario no puede cerrar el dialogo presionando fuera de él
+      builder: (BuildContext context) {
+        return PopScope(
+          canPop: false,
+          child: Dialog(
+
+            child: Padding(
+              padding: const EdgeInsets.all(50.0),
+              child: LoadingAnimationWidget.inkDrop(
+                color: const Color(0xFF4A90E2),
+                size: 50,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void hideLoadingDialog(BuildContext context) {
+    Navigator.of(context).pop();
+  }
 
   Future<void> _login() async {
+    showLoadingDialog(context);
     if (_formKey.currentState!.validate()) {
       try {
         final response = await _auth.signInWithEmailAndPassword(
@@ -59,6 +88,7 @@ class _LoginViewState extends State<LoginView> {
         );
       }
     }
+    hideLoadingDialog(context);
   }
 
   // Función para traducir códigos de error de Firebase a mensajes amigables
