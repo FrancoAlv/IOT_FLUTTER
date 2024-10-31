@@ -40,6 +40,14 @@ class DawerView extends StatelessWidget{
             ),
           ),
           ListTile(
+            leading: const Icon(Icons.home_filled),
+            title: const Text('Inicio'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.family_restroom),
             title: const Text('Listado de Familiares'),
             onTap: () {

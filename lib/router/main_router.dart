@@ -1,8 +1,10 @@
 
 import 'dart:async';
 
+import 'package:app_iot_web/views/contador/contador_view.dart';
 import 'package:app_iot_web/views/init/init_view.dart';
 import 'package:app_iot_web/views/login/login_view.dart';
+import 'package:app_iot_web/views/perfil/perfil_view.dart';
 import 'package:app_iot_web/views/registre/registre_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
@@ -22,7 +24,7 @@ sealed class MainRouter {
         final publicRoutes = ['/login', '/registre'];
 
         // Rutas Protegidas (requieren autenticación)
-        final protectedRoutes = ['/', '/dashboard', '/profile'];
+        final protectedRoutes = ['/', '/dashboard', '/profile',"/informacion_personal","/contador"];
 
         // Verifica si el usuario está en una ruta pública
         final isPublicRoute = publicRoutes.contains(state.fullPath);
@@ -68,6 +70,18 @@ sealed class MainRouter {
         builder: (BuildContext context, GoRouterState state) {
 
           return  RegistreView();
+        },
+      ),
+      GoRoute(
+        path: '/informacion_personal',
+        builder: (BuildContext context, GoRouterState state) {
+          return  PerfilView(showAppBar: true,);
+        },
+      ),
+      GoRoute(
+        path: '/contador',
+        builder: (BuildContext context, GoRouterState state) {
+          return  ContadorView();
         },
       ),
     ],

@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:app_iot_web/views/components/dawer_view.dart';
 import 'package:app_iot_web/views/consts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:injector/injector.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -43,6 +47,8 @@ class _PerfilViewState extends State<PerfilView> {
         ],
       )
           : null,
+      drawer: widget.showAppBar
+          ?  DawerView() : null,
       body: _buildPersonalInfoView(),
     );
   }
@@ -50,6 +56,9 @@ class _PerfilViewState extends State<PerfilView> {
   void initState() {
     super.initState();
     _fetchAccidents();
+    setState(() {
+    _serviceActive= Injector.appInstance.get<SharedPreferences>().getBool(Consts.keyservice) ?? false;
+  });
   }
 
 
@@ -76,7 +85,7 @@ class _PerfilViewState extends State<PerfilView> {
         headers: {'Content-Type': 'application/json'},
       );
 
-      if (response.statusCode >= 200 || response.statusCode<= 300)  {
+      if (response.statusCode >= 200 && response.statusCode<= 300)  {
         final Map<String, dynamic> data = jsonDecode(response.body);
         _nombreController.text=data["nombre"];
         _apellidoFirtsController.text=data["apellido_firts"];
@@ -85,7 +94,9 @@ class _PerfilViewState extends State<PerfilView> {
         _telefonoController.text=data["telefono"];
         _codigoIOTController.text=data["equipoIoT"]["numero_serie"];
       } else {
-        print('Error fetching accidents: ${response.reasonPhrase}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error del sistema por favor intentalo mas tarde')),
+        );
       }
     } catch (e) {
       print('Exception: $e');
@@ -174,6 +185,23 @@ class _PerfilViewState extends State<PerfilView> {
       ],
     );
   }
+  Future<void> _requestPermissions() async {
+    final notificationPermission = await FlutterForegroundTask.checkNotificationPermission();
+    if (notificationPermission != NotificationPermission.granted) {
+      await FlutterForegroundTask.requestNotificationPermission();
+    }
+
+    if (Platform.isAndroid && !await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+    }
+  }
+  Future<void> requestNotificationPermission() async {
+    if (Platform.isAndroid) {
+      if (await Permission.notification.isDenied) {
+        await Permission.notification.request();
+      }
+    }
+  }
 
   Widget _buildServiceSwitch() {
     return Row(
@@ -185,10 +213,19 @@ class _PerfilViewState extends State<PerfilView> {
         ),
         Switch(
           value: _serviceActive,
-          onChanged: (value) {
+          onChanged: (value) async {
             setState(() {
               _serviceActive = value;
             });
+            if (value){
+              FlutterForegroundTask.initCommunicationPort();
+              await requestNotificationPermission();
+              await _requestPermissions();
+
+            }else{
+              FlutterForegroundTask.stopService();
+            }
+            Injector.appInstance.get<SharedPreferences>().setBool(Consts.keyservice,value);
           },
           activeColor: Colors.blueAccent,
         ),
@@ -288,7 +325,7 @@ class _PerfilViewState extends State<PerfilView> {
         body: jsonEncode(userData),
         headers: {'Content-Type': 'application/json'},
       );
-      if (response.statusCode >= 200 || response.statusCode <= 300) {
+      if (response.statusCode >= 200 && response.statusCode <= 300) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         _nombreController.text = data["nombre"];
         _apellidoFirtsController.text = data["apellido_firts"];

@@ -106,7 +106,7 @@ class _RegistreViewState extends State<RegistreView> {
         body: jsonEncode(userData),
       );
 
-      if (response.statusCode >= 200 || response.statusCode<= 300) {
+      if (response.statusCode >= 200 && response.statusCode<= 300) {
         print('Datos enviados correctamente');
         return true;
       } else {
