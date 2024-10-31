@@ -1,4 +1,6 @@
+import 'package:app_iot_web/views/estadisticas/estadisticas_view.dart';
 import 'package:app_iot_web/views/maps/maps_view.dart';
+import 'package:app_iot_web/views/perfil/perfil_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -37,43 +39,13 @@ class _InitViewState extends State<InitView> {
   }
 
   Widget _buildStatisticsView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Estadísticas de Accidentes',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Aquí se mostrarán estadísticas relevantes.',
-            style: TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
-    );
+    return EstadisticasView();
   }
 
 
 
   Widget _buildPersonalInfoView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Información Personal',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Aquí se mostrará la información personal del usuario.',
-            style: TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
-    );
+    return PerfilView();
   }
 
   @override
