@@ -13,6 +13,7 @@ Future<bool> modulo() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+
   //instancia de injector para registro de dependencias
   final injector = Injector.appInstance;
   //Inicio del preferent para guardado de datos

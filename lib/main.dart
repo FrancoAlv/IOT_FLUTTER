@@ -7,6 +7,7 @@ import 'package:app_iot_web/views/consts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:go_router/go_router.dart';
 import 'package:injector/injector.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,12 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  Consts.keyrouter ='/contador';
+  Consts.keyrouterData =message.data;
+}
 
 void main() async {
   await modulo();
@@ -28,57 +35,44 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp>   with WidgetsBindingObserver{
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
+
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _checkAndStartForegroundService();
+    _configureFirebaseMessaging();
   }
-  void _checkAndStartForegroundService() {
-    final keyservice = Injector.appInstance.get<SharedPreferences>().getBool(Consts.keyservice) ?? false;
+
+  void _configureFirebaseMessaging() async {
+
+    final isActive = Injector.appInstance.get<SharedPreferences>().getBool(Consts.keyservice) ?? false;
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (keyservice && uid != null) {
-      FlutterForegroundTask.initCommunicationPort();
-      FlutterForegroundTask.init(
-        androidNotificationOptions: AndroidNotificationOptions(
-          channelId: 'foreground_service',
-          channelName: 'Foreground Service Notification',
-          channelDescription: 'Este servicio está ejecutándose en primer plano.',
-          channelImportance: NotificationChannelImportance.HIGH,
-          priority: NotificationPriority.HIGH,
-        ),
-        iosNotificationOptions: const IOSNotificationOptions(
-          showNotification: false,
-          playSound: false,
-        ),
-        foregroundTaskOptions: ForegroundTaskOptions(
-          eventAction: ForegroundTaskEventAction.repeat(5000),
-          autoRunOnBoot: true,
-          allowWakeLock: true,
-          allowWifiLock: true,
-        ),
-      );
-      FlutterForegroundTask.startService(
-        notificationTitle: 'WebSocket Activo',
-        notificationText: 'Escuchando eventos en segundo plano',
-        notificationIcon:const NotificationIconData(resType: ResourceType.drawable, resPrefix: ResourcePrefix.ic, name: 'notification'),
-        callback: startCallback,
-      );
-    } else {
-      FlutterForegroundTask.stopService();
+    if(isActive && uid!= null ){
+      await _firebaseMessaging.requestPermission();
+
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler,);
+
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message)async  {
+        print("Notificación de segundo plano abierta: ${message.notification?.title}");
+        Consts.keyrouter ="/contador";
+        Consts.keyrouterData =message.data;
+        // Manejo del mensaje cuando el usuario abre la notificación
+      });
+      RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+      if (initialMessage != null) {
+        print("Notificación de segundo plano abierta: ${initialMessage.notification?.title}");
+        Consts.keyrouter ="/contador";
+        Consts.keyrouterData =initialMessage.data;
+      }
     }
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
 
-  }
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -86,7 +80,6 @@ class _MyAppState extends State<MyApp>   with WidgetsBindingObserver{
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF4A90E2)),
         useMaterial3: true,
-
       ),
       debugShowCheckedModeBanner: false,
       routerConfig: MainRouter.router,

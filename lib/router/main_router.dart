@@ -1,6 +1,7 @@
 
 import 'dart:async';
 
+import 'package:app_iot_web/views/consts.dart';
 import 'package:app_iot_web/views/contador/contador_view.dart';
 import 'package:app_iot_web/views/init/init_view.dart';
 import 'package:app_iot_web/views/login/login_view.dart';
@@ -13,33 +14,23 @@ import 'package:go_router/go_router.dart';
 
 sealed class MainRouter {
 
-  abstract  String path;
-
   static GoRouter router = GoRouter(
       redirect: (context, state) {
-        // Estado de autenticación del usuario
+        if (Consts.keyrouter =="/contador"){
+          Consts.keyrouter ="";
+          return "/contador" ;
+        }
         final isLoggedIn = FirebaseAuth.instance.currentUser != null;
-
-        // Rutas Públicas (accesibles sin autenticación)
         final publicRoutes = ['/login', '/registre'];
-
-        // Rutas Protegidas (requieren autenticación)
         final protectedRoutes = ['/', '/dashboard', '/profile',"/informacion_personal","/contador"];
-
-        // Verifica si el usuario está en una ruta pública
         final isPublicRoute = publicRoutes.contains(state.fullPath);
-        // Verifica si el usuario está en una ruta protegida
         final isProtectedRoute = protectedRoutes.contains(state.fullPath);
-
         if (!isLoggedIn && isProtectedRoute) {
-          // Redirige a /login si el usuario no está autenticado y trata de acceder a una ruta protegida
-          return '/login';
+          return'/login';
         } else if (isLoggedIn && isPublicRoute) {
-          // Redirige a la página de inicio si el usuario está autenticado y está en una ruta pública
           return '/';
         }
 
-        // Si está en una ruta permitida según el estado de autenticación, no hacer redirección
         return state.fullPath;
       },
     routes: <RouteBase>[

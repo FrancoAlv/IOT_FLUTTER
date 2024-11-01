@@ -1,4 +1,5 @@
 import 'package:app_iot_web/views/components/dawer_view.dart';
+import 'package:app_iot_web/views/consts.dart';
 import 'package:app_iot_web/views/estadisticas/estadisticas_view.dart';
 import 'package:app_iot_web/views/maps/maps_view.dart';
 import 'package:app_iot_web/views/perfil/perfil_view.dart';
@@ -15,10 +16,43 @@ class InitView extends StatefulWidget {
   _InitViewState createState() => _InitViewState();
 }
 
-class _InitViewState extends State<InitView> {
+class _InitViewState extends State<InitView> with WidgetsBindingObserver {
 
   int _selectedIndex = 1; // Comienza en el índice de Mapa
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async  {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // La app ha vuelto al primer plano
+      while (true){
+        if (Consts.keyrouter!=""){
+        await Future.delayed(const Duration(seconds: 1),() {
+            context.go(Consts.keyrouter);
+            Consts.keyrouter="";
+        },);
+        }else{
+          break;
+        }
+
+      }
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {

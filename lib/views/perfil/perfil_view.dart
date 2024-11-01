@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
+
 import 'package:app_iot_web/views/components/dawer_view.dart';
 import 'package:app_iot_web/views/consts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:injector/injector.dart';
@@ -28,8 +29,9 @@ class _PerfilViewState extends State<PerfilView> {
   final TextEditingController _codigoIOTController = TextEditingController(text: '');
   final TextEditingController _correoController = TextEditingController(text: '');
   final TextEditingController _telefonoController = TextEditingController(text: '');
-
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   bool _serviceActive = false;
+  String _tokenmessagin = "";
 
   @override
   Widget build(BuildContext context) {
@@ -185,23 +187,7 @@ class _PerfilViewState extends State<PerfilView> {
       ],
     );
   }
-  Future<void> _requestPermissions() async {
-    final notificationPermission = await FlutterForegroundTask.checkNotificationPermission();
-    if (notificationPermission != NotificationPermission.granted) {
-      await FlutterForegroundTask.requestNotificationPermission();
-    }
 
-    if (Platform.isAndroid && !await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-    }
-  }
-  Future<void> requestNotificationPermission() async {
-    if (Platform.isAndroid) {
-      if (await Permission.notification.isDenied) {
-        await Permission.notification.request();
-      }
-    }
-  }
 
   Widget _buildServiceSwitch() {
     return Row(
@@ -218,13 +204,12 @@ class _PerfilViewState extends State<PerfilView> {
               _serviceActive = value;
             });
             if (value){
-              FlutterForegroundTask.initCommunicationPort();
-              await requestNotificationPermission();
-              await _requestPermissions();
 
-            }else{
-              FlutterForegroundTask.stopService();
+              await _firebaseMessaging.requestPermission();
+              // Obtener el token de FCM del dispositivo
+              _tokenmessagin= (await _firebaseMessaging.getToken())!;
             }
+            _saveProfile();
             Injector.appInstance.get<SharedPreferences>().setBool(Consts.keyservice,value);
           },
           activeColor: Colors.blueAccent,
@@ -318,6 +303,7 @@ class _PerfilViewState extends State<PerfilView> {
       "apellido_firts": _apellidoFirtsController.text.trim(),
       "apellido_second": _apellidoSecondController.text.trim(),
       "codigo_equipo_iot": _codigoIOTController.text.trim(),
+      "token_messagin":_tokenmessagin
     };
     try {
       final response = await http.put(
