@@ -6,6 +6,7 @@ import 'package:app_iot_web/views/contador/contador_view.dart';
 import 'package:app_iot_web/views/init/init_view.dart';
 import 'package:app_iot_web/views/login/login_view.dart';
 import 'package:app_iot_web/views/perfil/perfil_view.dart';
+import 'package:app_iot_web/views/policias/policias_view.dart';
 import 'package:app_iot_web/views/registre/registre_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
@@ -23,7 +24,7 @@ sealed class MainRouter {
         }
         final isLoggedIn = FirebaseAuth.instance.currentUser != null;
         final publicRoutes = ['/login', '/registre'];
-        final protectedRoutes = ['/', '/dashboard', '/profile',"/informacion_personal","/contador"];
+        final protectedRoutes = ['/', '/dashboard', '/profile',"/informacion_personal","/contador","/policias",];
         final isPublicRoute = publicRoutes.contains(state.fullPath);
         final isProtectedRoute = protectedRoutes.contains(state.fullPath);
         if (!isLoggedIn && isProtectedRoute) {
@@ -74,6 +75,12 @@ sealed class MainRouter {
         path: '/contador',
         builder: (BuildContext context, GoRouterState state) {
           return  ContadorView();
+        },
+      ),
+      GoRoute(
+        path: '/policias',
+        builder: (BuildContext context, GoRouterState state) {
+          return  PoliciasView();
         },
       ),
     ],

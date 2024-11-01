@@ -54,7 +54,6 @@ class _MyAppState extends State<MyApp>   with WidgetsBindingObserver{
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if(isActive && uid!= null ){
       await _firebaseMessaging.requestPermission();
-
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler,);
       FirebaseMessaging.onMessage.listen((RemoteMessage message)async  {
         if (message.notification?.title=="Se ha detectado un accidente"){
@@ -68,8 +67,6 @@ class _MyAppState extends State<MyApp>   with WidgetsBindingObserver{
           MainRouter.router.go("/contador");
           Consts.keyrouterData =message.data;
         }
-
-        // Manejo del mensaje cuando el usuario abre la notificación
       });
        FirebaseMessaging.instance.getInitialMessage().then((initialMessage) {
          if (initialMessage != null) {

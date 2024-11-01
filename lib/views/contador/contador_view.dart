@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:app_iot_web/views/components/dawer_view.dart';
 import 'package:app_iot_web/views/consts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:injector/injector.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 class ContadorView extends StatefulWidget {
   @override
   State<ContadorView> createState() => _ContadorViewState();
@@ -16,12 +18,14 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
   Timer? _timer;
   bool isSendingMessages = false;
   double progress = 1.0;
+  late  int _accidente_id;
 
   @override
   void initState() {
     super.initState();
     if (Consts.keyrouterData != null) {
       notificationMessage = Consts.keyrouterData?['mensaje'] ?? "";
+      _accidente_id = checkInt(checkDouble(Consts.keyrouterData?["accidente_id"]?? "0"))!;
       seconds = checkInt(checkDouble(Consts.keyrouterData?["timeout"]?? "0") / 1000)!;
       _duration = Duration(seconds: seconds);
       startTimer();
@@ -58,17 +62,23 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
   }
 
   void activateMessageSending() {
-    setState(() {
-      isSendingMessages = true;
-      notificationMessage = "Enviando mensajes en tiempo real";
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    Injector.appInstance.get<IO.Socket>().emit("respuestaUsuario",{
+      "uid_codigo": uid,
+      "accidente_id":_accidente_id,
+      "respuesta" : "enviar"
     });
+    context.go("/");
   }
 
   void deactivateMessageSending() {
-    setState(() {
-      isSendingMessages = false;
-      notificationMessage = "Mensajes desactivados";
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    Injector.appInstance.get<IO.Socket>().emit("respuestaUsuario",{
+      "uid_codigo": uid,
+      "accidente_id":_accidente_id,
+      "respuesta":"no"
     });
+    context.go("/");
   }
 
   void resetCountdown() {
