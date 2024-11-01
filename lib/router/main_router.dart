@@ -6,6 +6,8 @@ import 'package:app_iot_web/views/contador/contador_view.dart';
 import 'package:app_iot_web/views/init/init_view.dart';
 import 'package:app_iot_web/views/login/login_view.dart';
 import 'package:app_iot_web/views/perfil/perfil_view.dart';
+import 'package:app_iot_web/views/policias/policias_add_view.dart';
+import 'package:app_iot_web/views/policias/policias_edit_view.dart';
 import 'package:app_iot_web/views/policias/policias_view.dart';
 import 'package:app_iot_web/views/registre/registre_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,10 +20,6 @@ sealed class MainRouter {
   static GoRouter router = GoRouter(
       navigatorKey: GlobalKey<NavigatorState>(),
       redirect: (context, state) {
-        if (Consts.keyrouter =="/contador"){
-          Consts.keyrouter ="";
-          return "/contador" ;
-        }
         final isLoggedIn = FirebaseAuth.instance.currentUser != null;
         final publicRoutes = ['/login', '/registre'];
         final protectedRoutes = ['/', '/dashboard', '/profile',"/informacion_personal","/contador","/policias",];
@@ -82,6 +80,28 @@ sealed class MainRouter {
         builder: (BuildContext context, GoRouterState state) {
           return  PoliciasView();
         },
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (BuildContext context, GoRouterState state) {
+              return PoliciasAddView();
+            },
+          ),
+          GoRoute(
+            path: 'edit',
+            builder: (BuildContext context, GoRouterState state) {
+              final nombre = state.extra != null ? (state.extra as Map)['nombre'] : '';
+              final telefono = state.extra != null ? (state.extra as Map)['telefono'] : '';
+              final correo = state.extra != null ? (state.extra as Map)['correo'] : '';
+
+              return PoliciasEditView(
+                nombre: nombre,
+                telefono: telefono,
+                correo: correo,
+              );
+            },
+          ),
+        ],
       ),
     ],
   );

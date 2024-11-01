@@ -1,5 +1,6 @@
 import 'package:app_iot_web/views/components/dawer_view.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PoliciasView extends StatefulWidget {
   @override
@@ -14,19 +15,11 @@ class _PoliciasViewState extends State<PoliciasView> {
   ];
 
   void _addPolicia() {
-    setState(() {
-      policias.add({
-        'nombre': 'Nuevo Policía',
-        'telefono': '+51 999999999',
-        'correo': 'nuevo.policia@example.com',
-      });
-    });
+    context.go("/policias/add");
   }
 
   void _editPolicia(int index) {
-    setState(() {
-      policias[index]['nombre'] = 'Policía Editado';
-    });
+    context.go('/policias/edit', extra:  policias[index]);
   }
 
   void _confirmDeletePolicia(int index) {
