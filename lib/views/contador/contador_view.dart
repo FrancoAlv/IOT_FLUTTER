@@ -68,6 +68,10 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
       "accidente_id":_accidente_id,
       "respuesta" : "enviar"
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text('Pronto tus familiares recibiran la alerta')),
+    );
     context.go("/");
   }
 
@@ -78,6 +82,10 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
       "accidente_id":_accidente_id,
       "respuesta":"no"
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text('No se enviara ningun mensaje a tus familiares')),
+    );
     context.go("/");
   }
 

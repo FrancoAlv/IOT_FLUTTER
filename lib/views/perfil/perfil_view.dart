@@ -23,12 +23,18 @@ class PerfilView extends StatefulWidget {
 }
 
 class _PerfilViewState extends State<PerfilView> {
-  final TextEditingController _nombreController = TextEditingController(text: '');
-  final TextEditingController _apellidoFirtsController = TextEditingController(text: '');
-  final TextEditingController _apellidoSecondController = TextEditingController(text: '');
-  final TextEditingController _codigoIOTController = TextEditingController(text: '');
-  final TextEditingController _correoController = TextEditingController(text: '');
-  final TextEditingController _telefonoController = TextEditingController(text: '');
+  final TextEditingController _nombreController =
+      TextEditingController(text: '');
+  final TextEditingController _apellidoFirtsController =
+      TextEditingController(text: '');
+  final TextEditingController _apellidoSecondController =
+      TextEditingController(text: '');
+  final TextEditingController _codigoIOTController =
+      TextEditingController(text: '');
+  final TextEditingController _correoController =
+      TextEditingController(text: '');
+  final TextEditingController _telefonoController =
+      TextEditingController(text: '');
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   bool _serviceActive = false;
   String _tokenmessagin = "";
@@ -38,31 +44,33 @@ class _PerfilViewState extends State<PerfilView> {
     return Scaffold(
       appBar: widget.showAppBar
           ? AppBar(
-        title: Text('Perfil del Usuario'),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF4A90E2),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: _saveProfile,
-          ),
-        ],
-      )
+              title: Text('Perfil del Usuario'),
+              centerTitle: true,
+              backgroundColor: const Color(0xFF4A90E2),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.save),
+                  onPressed: _saveProfile,
+                ),
+              ],
+            )
           : null,
-      drawer: widget.showAppBar
-          ?  DawerView() : null,
+      drawer: widget.showAppBar ? DawerView() : null,
       body: _buildPersonalInfoView(),
     );
   }
+
   @override
   void initState() {
     super.initState();
     _fetchAccidents();
     setState(() {
-    _serviceActive= Injector.appInstance.get<SharedPreferences>().getBool(Consts.keyservice) ?? false;
-  });
+      _serviceActive = Injector.appInstance
+              .get<SharedPreferences>()
+              .getBool(Consts.keyservice) ??
+          false;
+    });
   }
-
 
   Future<void> _fetchAccidents() async {
     Future.delayed(Duration.zero, () => showLoadingDialog(context));
@@ -78,7 +86,7 @@ class _PerfilViewState extends State<PerfilView> {
 
     final Map<String, dynamic> userData = {
       "correo": email,
-      "uid_codigo":user.uid
+      "uid_codigo": user.uid
     };
     try {
       final response = await http.post(
@@ -87,17 +95,18 @@ class _PerfilViewState extends State<PerfilView> {
         headers: {'Content-Type': 'application/json'},
       );
 
-      if (response.statusCode >= 200 && response.statusCode<= 300)  {
+      if (response.statusCode >= 200 && response.statusCode <= 300) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        _nombreController.text=data["nombre"];
-        _apellidoFirtsController.text=data["apellido_firts"];
-        _apellidoSecondController.text=data["apellido_second"];
-        _correoController.text=data["correo"];
-        _telefonoController.text=data["telefono"];
-        _codigoIOTController.text=data["equipoIoT"]["numero_serie"];
+        _nombreController.text = data["nombre"];
+        _apellidoFirtsController.text = data["apellido_firts"];
+        _apellidoSecondController.text = data["apellido_second"];
+        _correoController.text = data["correo"];
+        _telefonoController.text = data["telefono"];
+        _codigoIOTController.text = data["equipoIoT"]["numero_serie"];
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error del sistema por favor intentalo mas tarde')),
+          const SnackBar(
+              content: Text('Error del sistema por favor intentalo mas tarde')),
         );
       }
     } catch (e) {
@@ -133,7 +142,6 @@ class _PerfilViewState extends State<PerfilView> {
     Navigator.of(contextone).pop();
   }
 
-
   Widget _buildPersonalInfoView() {
     return SingleChildScrollView(
       child: Padding(
@@ -144,7 +152,10 @@ class _PerfilViewState extends State<PerfilView> {
           children: [
             Text(
               'Información Personal',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent),
             ),
             const SizedBox(height: 20),
             _buildEditableField('Nombre', _nombreController),
@@ -155,7 +166,8 @@ class _PerfilViewState extends State<PerfilView> {
             const SizedBox(height: 16),
             _buildPhoneField(),
             const SizedBox(height: 16),
-            _buildEditableField('Nunero de serie del IOT', _codigoIOTController),
+            _buildEditableField(
+                'Nunero de serie del IOT', _codigoIOTController),
             const SizedBox(height: 16),
             _buildEmailField(),
             const SizedBox(height: 16),
@@ -174,7 +186,8 @@ class _PerfilViewState extends State<PerfilView> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const SizedBox(height: 4),
         TextFormField(
@@ -187,7 +200,6 @@ class _PerfilViewState extends State<PerfilView> {
       ],
     );
   }
-
 
   Widget _buildServiceSwitch() {
     return Row(
@@ -203,14 +215,15 @@ class _PerfilViewState extends State<PerfilView> {
             setState(() {
               _serviceActive = value;
             });
-            if (value){
-
+            if (value) {
               await _firebaseMessaging.requestPermission();
               // Obtener el token de FCM del dispositivo
-              _tokenmessagin= (await _firebaseMessaging.getToken())!;
+              _tokenmessagin = (await _firebaseMessaging.getToken())!;
             }
             _saveProfile();
-            Injector.appInstance.get<SharedPreferences>().setBool(Consts.keyservice,value);
+            Injector.appInstance
+                .get<SharedPreferences>()
+                .setBool(Consts.keyservice, value);
           },
           activeColor: Colors.blueAccent,
         ),
@@ -234,7 +247,8 @@ class _PerfilViewState extends State<PerfilView> {
           children: [
             Icon(Icons.save, color: Colors.white),
             SizedBox(width: 8),
-            Text('Guardar', style: TextStyle(fontSize: 16, color: Colors.white)),
+            Text('Guardar',
+                style: TextStyle(fontSize: 16, color: Colors.white)),
           ],
         ),
       ),
@@ -247,7 +261,8 @@ class _PerfilViewState extends State<PerfilView> {
       children: [
         const Text(
           'Correo',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const SizedBox(height: 4),
         TextFormField(
@@ -270,7 +285,8 @@ class _PerfilViewState extends State<PerfilView> {
       children: [
         const Text(
           'Teléfono',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
         ),
         const SizedBox(height: 4),
         TextFormField(
@@ -303,7 +319,7 @@ class _PerfilViewState extends State<PerfilView> {
       "apellido_firts": _apellidoFirtsController.text.trim(),
       "apellido_second": _apellidoSecondController.text.trim(),
       "codigo_equipo_iot": _codigoIOTController.text.trim(),
-      "token_messagin":_tokenmessagin
+      "token_messagin": _tokenmessagin
     };
     try {
       final response = await http.put(
@@ -321,7 +337,8 @@ class _PerfilViewState extends State<PerfilView> {
         _codigoIOTController.text = data["equipoIoT"]["numero_serie"];
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error del sistema por favor intentalo mas tarde')),
+          const SnackBar(
+              content: Text('Error del sistema por favor intentalo mas tarde')),
         );
       }
     } catch (e) {

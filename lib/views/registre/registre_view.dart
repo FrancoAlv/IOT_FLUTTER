@@ -16,38 +16,42 @@ class _RegistreViewState extends State<RegistreView> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _apellidofirtsController = TextEditingController();
-  final TextEditingController _apellidosecondController = TextEditingController();
+  final TextEditingController _apellidofirtsController =
+      TextEditingController();
+  final TextEditingController _apellidosecondController =
+      TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _codigoEquipoController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   Future<void> _registerUser() async {
     if (_formKey.currentState!.validate()) {
       showLoadingDialog(context);
       try {
         // Registro en Firebase
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
           email: _correoController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
         // Si el registro en Firebase es exitoso, realiza la solicitud HTTP
         if (userCredential.user != null) {
-         await _auth.signOut();
-         final response= await _sendUserData(userCredential.user?.uid);
-         if (response){
-           ScaffoldMessenger.of(context).showSnackBar(
-             const SnackBar(content: Text('Usuario registrado exitosamente')),
-           );
-           if (context.canPop()){
-             context.pop();
-           }else{
-             context.go("/login");
-           }
-         }
+          await _auth.signOut();
+          final response = await _sendUserData(userCredential.user?.uid);
+          if (response) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Usuario registrado exitosamente')),
+            );
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go("/login");
+            }
+          }
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -68,7 +72,6 @@ class _RegistreViewState extends State<RegistreView> {
         return PopScope(
           canPop: false,
           child: Dialog(
-
             child: Padding(
               padding: const EdgeInsets.all(50.0),
               child: LoadingAnimationWidget.inkDrop(
@@ -87,14 +90,15 @@ class _RegistreViewState extends State<RegistreView> {
   }
 
   Future<bool> _sendUserData(String? uid_codigo) async {
-    const String url = "${Consts.urlbase}/usuario/crear"; // Cambia esta URL a la de tu API
+    const String url =
+        "${Consts.urlbase}/usuario/crear"; // Cambia esta URL a la de tu API
 
     final Map<String, dynamic> userData = {
       "nombre": _nombreController.text.trim(),
       "correo": _correoController.text.trim(),
       "telefono": _telefonoController.text.trim(),
-      "uid_codigo":uid_codigo,
-      "apellido_firts":_apellidofirtsController.text.trim(),
+      "uid_codigo": uid_codigo,
+      "apellido_firts": _apellidofirtsController.text.trim(),
       "apellido_second": _apellidosecondController.text.trim(),
       "codigo_equipo_iot": _codigoEquipoController.text.trim(),
     };
@@ -106,7 +110,7 @@ class _RegistreViewState extends State<RegistreView> {
         body: jsonEncode(userData),
       );
 
-      if (response.statusCode >= 200 && response.statusCode<= 300) {
+      if (response.statusCode >= 200 && response.statusCode <= 300) {
         print('Datos enviados correctamente');
         return true;
       } else {
@@ -129,12 +133,11 @@ class _RegistreViewState extends State<RegistreView> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            if (context.canPop()){
+            if (context.canPop()) {
               context.pop();
-            }else{
+            } else {
               context.go("/login");
             }
-
           },
         ),
       ),
@@ -160,17 +163,22 @@ class _RegistreViewState extends State<RegistreView> {
                   const SizedBox(height: 20),
                   _buildTextField(_apellidofirtsController, 'Primer Apellido'),
                   const SizedBox(height: 20),
-                  _buildTextField(_apellidosecondController, 'Segundo Apellido'),
+                  _buildTextField(
+                      _apellidosecondController, 'Segundo Apellido'),
                   const SizedBox(height: 15),
                   _buildEmailField(_correoController, 'Correo Electrónico'),
                   const SizedBox(height: 15),
-                  _buildTextField(_telefonoController, 'Número de Teléfono', TextInputType.phone),
+                  _buildTextField(_telefonoController, 'Número de Teléfono',
+                      TextInputType.phone),
                   const SizedBox(height: 15),
-                  _buildTextField(_codigoEquipoController, 'Código de Equipo IoT'),
+                  _buildTextField(
+                      _codigoEquipoController, 'Código de Equipo IoT'),
                   const SizedBox(height: 15),
                   _buildPasswordField(_passwordController, 'Contraseña'),
                   const SizedBox(height: 15),
-                  _buildPasswordField(_confirmPasswordController, 'Confirmación de Contraseña', isConfirmation: true),
+                  _buildPasswordField(
+                      _confirmPasswordController, 'Confirmación de Contraseña',
+                      isConfirmation: true),
                   const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: _registerUser,
@@ -196,7 +204,8 @@ class _RegistreViewState extends State<RegistreView> {
   }
 
   // Constructor de campos de texto comunes
-  Widget _buildTextField(TextEditingController controller, String labelText, [TextInputType keyboardType = TextInputType.text]) {
+  Widget _buildTextField(TextEditingController controller, String labelText,
+      [TextInputType keyboardType = TextInputType.text]) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -243,7 +252,8 @@ class _RegistreViewState extends State<RegistreView> {
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Por favor ingrese un correo electrónico';
-        } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+        } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+            .hasMatch(value)) {
           return 'Por favor ingrese un correo válido';
         }
         return null;
@@ -252,7 +262,8 @@ class _RegistreViewState extends State<RegistreView> {
   }
 
   // Campo de contraseña con validación y confirmación opcional
-  Widget _buildPasswordField(TextEditingController controller, String labelText, {bool isConfirmation = false}) {
+  Widget _buildPasswordField(TextEditingController controller, String labelText,
+      {bool isConfirmation = false}) {
     return TextFormField(
       controller: controller,
       obscureText: true,

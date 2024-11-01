@@ -9,29 +9,37 @@ class DawerView extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-
+    final email = FirebaseAuth.instance.currentUser?.email?? "";
     return  Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
+           DrawerHeader(
+            decoration: const BoxDecoration(
               color: Color(0xFF4A90E2),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Seguridad Vial',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
                   ),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  'Usuario',
+                const SizedBox(height: 8),
+                const Text(
+                  'Usuario:',
                   style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  email,
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 16,
                   ),
