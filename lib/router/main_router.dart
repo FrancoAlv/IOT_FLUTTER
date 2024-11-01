@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 sealed class MainRouter {
 
   static GoRouter router = GoRouter(
+      navigatorKey: GlobalKey<NavigatorState>(),
       redirect: (context, state) {
         if (Consts.keyrouter =="/contador"){
           Consts.keyrouter ="";

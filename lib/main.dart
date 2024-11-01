@@ -18,8 +18,10 @@ import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  Consts.keyrouter ='/contador';
-  Consts.keyrouterData =message.data;
+  if (message.notification?.title=="Se ha detectado un accidente"){
+    MainRouter.router.go("/contador");
+    Consts.keyrouterData =message.data;
+  }
 }
 
 void main() async {
@@ -54,19 +56,31 @@ class _MyAppState extends State<MyApp>   with WidgetsBindingObserver{
       await _firebaseMessaging.requestPermission();
 
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler,);
-
-      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message)async  {
-        print("Notificación de segundo plano abierta: ${message.notification?.title}");
-        Consts.keyrouter ="/contador";
-        Consts.keyrouterData =message.data;
+      FirebaseMessaging.onMessage.listen((RemoteMessage message)async  {
+        if (message.notification?.title=="Se ha detectado un accidente"){
+          MainRouter.router.go("/contador");
+          Consts.keyrouterData =message.data;
+        }
         // Manejo del mensaje cuando el usuario abre la notificación
       });
-      RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-      if (initialMessage != null) {
-        print("Notificación de segundo plano abierta: ${initialMessage.notification?.title}");
-        Consts.keyrouter ="/contador";
-        Consts.keyrouterData =initialMessage.data;
-      }
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message)async  {
+        if (message.notification?.title=="Se ha detectado un accidente"){
+          MainRouter.router.go("/contador");
+          Consts.keyrouterData =message.data;
+        }
+
+        // Manejo del mensaje cuando el usuario abre la notificación
+      });
+       FirebaseMessaging.instance.getInitialMessage().then((initialMessage) {
+         if (initialMessage != null) {
+           print("Notificación de segundo plano abierta: ${initialMessage.notification?.title}");
+           if (initialMessage.notification?.title=="Se ha detectado un accidente"){
+             MainRouter.router.go("/contador");
+             Consts.keyrouterData =initialMessage.data;
+           }
+         }
+      },);
+
     }
   }
 

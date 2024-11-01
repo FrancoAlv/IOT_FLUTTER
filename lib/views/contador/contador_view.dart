@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app_iot_web/views/components/dawer_view.dart';
 import 'package:app_iot_web/views/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ContadorView extends StatefulWidget {
   @override
@@ -20,10 +21,11 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
   void initState() {
     super.initState();
     if (Consts.keyrouterData != null) {
-      notificationMessage = Consts.keyrouterData['mensaje'] ?? "";
-      seconds = checkInt(checkDouble(Consts.keyrouterData["timeout"]) / 1000)!;
+      notificationMessage = Consts.keyrouterData?['mensaje'] ?? "";
+      seconds = checkInt(checkDouble(Consts.keyrouterData?["timeout"]?? "0") / 1000)!;
       _duration = Duration(seconds: seconds);
       startTimer();
+      Consts.keyrouterData=null;
     }
   }
 
@@ -45,6 +47,7 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_duration.inSeconds <= 0) {
         _timer?.cancel();
+        context.go("/");
       } else {
         setState(() {
           _duration = _duration - Duration(seconds: 1);

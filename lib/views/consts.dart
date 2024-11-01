@@ -5,5 +5,5 @@ sealed class Consts {
    static const String keyservice="keyservice";
    static const String lastAccidentKey="lastAccidentKey";
    static String keyrouter="";
-   static Map<String,dynamic> keyrouterData= {};
+   static Map<String,dynamic>? keyrouterData= null;
 }
