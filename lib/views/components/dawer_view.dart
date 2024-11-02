@@ -60,7 +60,7 @@ class DawerView extends StatelessWidget{
             title: const Text('Listado de Familiares'),
             onTap: () {
               Navigator.pop(context);
-              context.go('/familiares');
+              context.go('/familiar');
             },
           ),
           ListTile(

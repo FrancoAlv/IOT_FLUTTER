@@ -1,8 +1,7 @@
-
-import 'dart:async';
-
-import 'package:app_iot_web/views/consts.dart';
 import 'package:app_iot_web/views/contador/contador_view.dart';
+import 'package:app_iot_web/views/familiares/familiares_add_view.dart';
+import 'package:app_iot_web/views/familiares/familiares_edit_view.dart';
+import 'package:app_iot_web/views/familiares/familiares_view.dart';
 import 'package:app_iot_web/views/init/init_view.dart';
 import 'package:app_iot_web/views/login/login_view.dart';
 import 'package:app_iot_web/views/perfil/perfil_view.dart';
@@ -10,6 +9,8 @@ import 'package:app_iot_web/views/policias/policias_add_view.dart';
 import 'package:app_iot_web/views/policias/policias_edit_view.dart';
 import 'package:app_iot_web/views/policias/policias_view.dart';
 import 'package:app_iot_web/views/registre/registre_view.dart';
+import 'package:app_iot_web/views/seguro/seguro_add_view.dart';
+import 'package:app_iot_web/views/seguro/seguro_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ sealed class MainRouter {
       redirect: (context, state) {
         final isLoggedIn = FirebaseAuth.instance.currentUser != null;
         final publicRoutes = ['/login', '/registre'];
-        final protectedRoutes = ['/', '/dashboard', '/profile',"/informacion_personal","/contador","/policias",];
+        final protectedRoutes = ['/', '/dashboard', '/seguro',"/informacion_personal","/contador","/policias","/familiar"];
         final isPublicRoute = publicRoutes.contains(state.fullPath);
         final isProtectedRoute = protectedRoutes.contains(state.fullPath);
         if (!isLoggedIn && isProtectedRoute) {
@@ -74,6 +75,46 @@ sealed class MainRouter {
         builder: (BuildContext context, GoRouterState state) {
           return  ContadorView();
         },
+      ),
+      GoRoute(
+        path: '/familiar',
+        builder: (BuildContext context, GoRouterState state) {
+          return  FamiliaresView();
+        },
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (BuildContext context, GoRouterState state) {
+              return  FamiliaresAddView();
+            },
+          ),
+          GoRoute(
+            path: 'edit',
+            builder: (BuildContext context, GoRouterState state) {
+              return  FamiliaresEditView();
+            },
+          ),
+        ]
+      ),
+      GoRoute(
+        path: '/seguro',
+        builder: (BuildContext context, GoRouterState state) {
+          return  SeguroView();
+        },
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (BuildContext context, GoRouterState state) {
+              return  SeguroAddView();
+            },
+          ),
+          GoRoute(
+            path: 'edit',
+            builder: (BuildContext context, GoRouterState state) {
+              return  FamiliaresEditView();
+            },
+          ),
+        ]
       ),
       GoRoute(
         path: '/policias',

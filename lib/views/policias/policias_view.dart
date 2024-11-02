@@ -249,9 +249,11 @@ class _PoliciasViewState extends State<PoliciasView>  {
                             children: [
                               Icon(Icons.email, color: Colors.blueAccent, size: 18),
                               const SizedBox(width: 8),
-                              Text(
-                                policia['correo'] ?? '',
-                                style: TextStyle(fontSize: 16, color: Colors.black87),
+                              Flexible(
+                                child: Text(
+                                  policia['correo'] ?? '',
+                                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                                ),
                               ),
                             ],
                           ),
