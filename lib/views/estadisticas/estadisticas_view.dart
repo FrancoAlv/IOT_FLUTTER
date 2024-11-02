@@ -91,7 +91,7 @@ class _EstadisticasViewState extends State<EstadisticasView> {
                 double.parse(latLng[0]),
                 double.parse(latLng[1]),
               ),
-              "streetname": json["streetname"],
+              "streetname": json?["streetname"] ?? "Unknown",
               'date': DateTime.parse(json['fecha_hora']),
               'time': TimeOfDay(
                 hour: DateTime.parse(json['fecha_hora']).hour,
@@ -111,7 +111,7 @@ class _EstadisticasViewState extends State<EstadisticasView> {
           // Contar accidentes por ubicación
           accidentsByLocation = {};
           for (var accident in _accidents) {
-            String location = accident['streetname'];
+            String location = accident?['streetname']??"Unknown";
             if (accidentsByLocation.containsKey(location)) {
               accidentsByLocation[location] = accidentsByLocation[location]! + 1;
             } else {

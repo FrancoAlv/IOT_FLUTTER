@@ -91,7 +91,18 @@ sealed class MainRouter {
           GoRoute(
             path: 'edit',
             builder: (BuildContext context, GoRouterState state) {
-              return  FamiliaresEditView();
+              final nombre = state.extra != null ? (state.extra as Map)['nombre'] : '';
+              final telefono = state.extra != null ? (state.extra as Map)['telefono'] : '';
+              final correo = state.extra != null ? (state.extra as Map)['correo'] : '';
+              final relacion = state.extra != null ? (state.extra as Map)['relacion'] : '';
+              final familiarId = state.extra != null ? checkInt((state.extra as Map)['familiar_id'] ) ??0: 0;
+              return  FamiliaresEditView(
+                nombre: nombre,
+                correo: correo,
+                telefono: telefono,
+                familiarId: familiarId,
+                relacion: relacion,
+              );
             },
           ),
         ]
@@ -111,7 +122,18 @@ sealed class MainRouter {
           GoRoute(
             path: 'edit',
             builder: (BuildContext context, GoRouterState state) {
-              return  FamiliaresEditView();
+              final nombre = state.extra != null ? (state.extra as Map)['nombre'] : '';
+              final telefono = state.extra != null ? (state.extra as Map)['telefono'] : '';
+              final correo = state.extra != null ? (state.extra as Map)['correo'] : '';
+              final relacion = state.extra != null ? (state.extra as Map)['relacion'] : '';
+              final familiarId = state.extra != null ? checkInt((state.extra as Map)['familiar_id'] ) ??0: 0;
+              return  FamiliaresEditView(
+                nombre: nombre,
+                correo: correo,
+                telefono: telefono,
+                familiarId: familiarId,
+                relacion: relacion,
+              );
             },
           ),
         ]

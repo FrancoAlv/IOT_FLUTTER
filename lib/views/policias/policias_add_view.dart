@@ -31,7 +31,7 @@ class _PoliciasAddViewState extends State<PoliciasAddView> {
   }
 
   Future<void> _fetchAccidents() async {
-    Future.delayed(Duration.zero, () => showLoadingDialog(context));
+    showLoadingDialog(context);
 
     final user = FirebaseAuth.instance.currentUser;
 

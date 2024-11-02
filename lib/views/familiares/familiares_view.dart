@@ -1,37 +1,27 @@
+import 'dart:convert';
 import 'package:app_iot_web/views/components/dawer_view.dart';
+import 'package:app_iot_web/views/consts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 
-class FamiliaresView extends StatelessWidget {
-  final List<Map<String, String>> familiares = [
-    {
-      "nombre": "María López",
-      "telefono": "+51 987654321",
-      "correo": "maria.lopez@example.com",
-      "relacion": "Madre"
-    },
-    {
-      "nombre": "Carlos Sánchez",
-      "telefono": "+51 987654322",
-      "correo": "carlos.sanchez@example.com",
-      "relacion": "Padre"
-    },
-    {
-      "nombre": "Ana Gómez",
-      "telefono": "+51 987654323",
-      "correo": "ana.gomez@example.com",
-      "relacion": "Hermana"
-    }
-  ];
+class FamiliaresView extends StatefulWidget {
+  @override
+  State<FamiliaresView> createState() => _FamiliaresViewState();
+}
+
+class _FamiliaresViewState extends State<FamiliaresView> {
+  List<Map<String, dynamic>> familiares = [];
+  bool isLoading = false;
+  bool isError = false;
 
   void _addFamiliar(BuildContext context) {
-    // Navegar a la pantalla para agregar un nuevo familiar
-     context.push('/familiar/add');
+    context.push('/familiar/add').then((value) => _fetchFamiliares());
   }
 
   void _editFamiliar(BuildContext context, int index) {
-    // Navegar a la pantalla para editar el familiar
-     context.push('/familiar/edit', extra: familiares[index]);
+    context.push('/familiar/edit', extra: familiares[index]).then((value) => _fetchFamiliares());
   }
 
   void _confirmDeleteFamiliar(BuildContext context, int index) {
@@ -59,9 +49,81 @@ class FamiliaresView extends StatelessWidget {
     );
   }
 
-  void _deleteFamiliar(int index) {
-    // Lógica para eliminar el familiar
-    print("Familiar eliminado: ${familiares[index]['nombre']}");
+  void _deleteFamiliar(int index) async {
+    setState(() {
+      isLoading = true;
+      isError = false;
+    });
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final url = Uri.parse('${Consts.urlbase}/usuario/${user.uid}/familiar/${familiares[index]["familiar_id"]}');
+
+    try {
+      final response = await http.delete(url, headers: {'Content-Type': 'application/json'});
+      if (response.statusCode >= 200 && response.statusCode <= 300) {
+        final data = jsonDecode(response.body) as Map<String,dynamic>;
+        final messaje=data["message"] ??"";
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(messaje)),
+        );
+      } else {
+        setState(() {
+          isError = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isError = true;
+      });
+      print('Exception: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchFamiliares();
+  }
+
+  Future _fetchFamiliares() async {
+    setState(() {
+      isLoading = true;
+      isError = false;
+    });
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final url = Uri.parse('${Consts.urlbase}/usuario/${user.uid}/familiar');
+
+    try {
+      final response = await http.get(url, headers: {'Content-Type': 'application/json'});
+      if (response.statusCode >= 200 && response.statusCode <= 300) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        familiares = data.cast<Map<String, dynamic>>();
+        setState(() {});
+      } else {
+        setState(() {
+          isError = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isError = true;
+      });
+      print('Exception: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -72,8 +134,28 @@ class FamiliaresView extends StatelessWidget {
         backgroundColor: Color(0xFF4A90E2),
       ),
       drawer: DawerView(),
-      body: familiares.isNotEmpty
-          ? ListView.builder(
+      body: isLoading
+          ? Center(
+        child: CircularProgressIndicator(),
+      )
+          : isError
+          ? _buildErrorContent()
+          : familiares.isNotEmpty
+          ? _buildFamiliaresList()
+          : _buildEmptyContent(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addFamiliar(context),
+        backgroundColor: Colors.blueAccent,
+        child: Icon(Icons.add),
+        tooltip: 'Agregar Familiar',
+      ),
+    );
+  }
+
+  Widget _buildFamiliaresList() {
+    return RefreshIndicator(
+      onRefresh: _fetchFamiliares,
+      child: ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: familiares.length,
         itemBuilder: (context, index) {
@@ -101,44 +183,11 @@ class FamiliaresView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(Icons.phone, color: Colors.blueAccent, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              familiar['telefono'] ?? '',
-                              style: TextStyle(fontSize: 16, color: Colors.black87),
-                            ),
-                          ],
-                        ),
+                        _buildInfoRow(Icons.phone, familiar['telefono'] ?? ''),
                         const SizedBox(height: 8),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.email, color: Colors.blueAccent, size: 18),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                familiar['correo'] ?? '',
-                                style: TextStyle(fontSize: 16, color: Colors.black87),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
+                        _buildInfoRow(Icons.email, familiar['correo'] ?? ''),
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(Icons.group, color: Colors.blueAccent, size: 18),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                "Relación: ${familiar['relacion'] ?? ''}",
-                                style: TextStyle(fontSize: 16, color: Colors.black87),
-                              ),
-                            ),
-                          ],
-                        ),
+                        _buildInfoRow(Icons.group, "Relación: ${familiar['relacion'] ?? ''}"),
                       ],
                     ),
                   ),
@@ -177,46 +226,85 @@ class FamiliaresView extends StatelessWidget {
             ),
           );
         },
-      )
-          : Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.family_restroom,
-              color: Colors.grey,
-              size: 80,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "No hay familiares registrados",
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => _fetchFamiliares(), // Función para recargar los datos
-              icon: Icon(Icons.refresh),
-              label: Text("Reintentar"),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _addFamiliar(context),
-        backgroundColor: Colors.blueAccent,
-        child: Icon(Icons.add),
-        tooltip: 'Agregar Familiar',
       ),
     );
   }
 
-  void _fetchFamiliares() {
-    // Lógica para obtener la lista de familiares desde una API o fuente de datos.
+  Widget _buildInfoRow(IconData icon, String info) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: Colors.blueAccent, size: 18),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            info,
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorContent() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error, color: Colors.redAccent, size: 80),
+          const SizedBox(height: 16),
+          Text(
+            "Ocurrió un error al cargar los datos",
+            style: TextStyle(fontSize: 18, color: Colors.redAccent),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _fetchFamiliares,
+            icon: Icon(Icons.refresh),
+            label: Text("Reintentar"),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              backgroundColor: Colors.redAccent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyContent() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.family_restroom,
+            color: Colors.grey,
+            size: 80,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "No hay familiares registrados",
+            style: TextStyle(fontSize: 18, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _fetchFamiliares,
+            icon: Icon(Icons.refresh),
+            label: Text("Reintentar"),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
