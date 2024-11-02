@@ -93,11 +93,12 @@ sealed class MainRouter {
               final nombre = state.extra != null ? (state.extra as Map)['nombre'] : '';
               final telefono = state.extra != null ? (state.extra as Map)['telefono'] : '';
               final correo = state.extra != null ? (state.extra as Map)['correo'] : '';
-
+              final policiaId = state.extra != null ? checkInt((state.extra as Map)['policia_id'] ) ??0: 0;
               return PoliciasEditView(
                 nombre: nombre,
                 telefono: telefono,
                 correo: correo,
+                policiaID: policiaId,
               );
             },
           ),
@@ -105,7 +106,12 @@ sealed class MainRouter {
       ),
     ],
   );
-
+  static int? checkInt(dynamic value) {
+    if(value is int) return value;
+    if(value is double) return value.toInt();
+    if(value is String) return int.tryParse(value);
+    return null;
+  }
 }
 
 
