@@ -84,6 +84,7 @@ class _FamiliaresViewState extends State<FamiliaresView> {
         isLoading = false;
       });
     }
+    _fetchFamiliares();
   }
 
   @override
