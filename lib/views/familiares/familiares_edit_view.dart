@@ -31,6 +31,7 @@ class _FamiliaresEditViewState extends State<FamiliaresEditView> {
   late TextEditingController _telefonoController;
   late TextEditingController _correoController;
   late TextEditingController _relacionController;
+  bool _isActive = true;
 
   @override
   void initState() {
@@ -59,7 +60,8 @@ class _FamiliaresEditViewState extends State<FamiliaresEditView> {
         "nombre": nombre.trim(),
         "correo": correo.trim(),
         "telefono":telefono.trim().replaceAll(" ", ""),
-        "relacion":relacion.trim()
+        "relacion":relacion.trim(),
+        "isActive": _isActive,
       };
       try {
         final response = await http.put(
@@ -197,6 +199,25 @@ class _FamiliaresEditViewState extends State<FamiliaresEditView> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Text(
+                      "Estado:",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Switch(
+                      value: _isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          _isActive = value;
+                        });
+                      },
+                    ),
+                    Text(_isActive ? "Activo" : "Inactivo"),
+                  ],
+                ),
+
                 SizedBox(height: 24),
                 Center(
                   child: ElevatedButton.icon(

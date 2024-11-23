@@ -17,6 +17,7 @@ class _FamiliaresAddViewState extends State<FamiliaresAddView> {
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _relacionController = TextEditingController();
+  bool _isActive = true;
 
   void _saveFamiliar(BuildContext context) async{
     if (_formKey.currentState?.validate() ?? false) {
@@ -39,7 +40,8 @@ class _FamiliaresAddViewState extends State<FamiliaresAddView> {
         "nombre": nombre.trim(),
         "correo": correo.trim(),
         "telefono":telefono.trim().replaceAll(" ", ""),
-        "relacion":relacion.trim()
+        "relacion":relacion.trim(),
+        "isActive": _isActive,
       };
       try {
         final response = await http.post(
@@ -178,6 +180,24 @@ class _FamiliaresAddViewState extends State<FamiliaresAddView> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Text(
+                      "Estado:",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Switch(
+                      value: _isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          _isActive = value;
+                        });
+                      },
+                    ),
+                    Text(_isActive ? "Activo" : "Inactivo"),
+                  ],
                 ),
                 SizedBox(height: 24),
                 Center(
