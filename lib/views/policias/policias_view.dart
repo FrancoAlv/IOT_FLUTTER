@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class PoliciasView extends StatefulWidget {
   @override
@@ -386,9 +387,58 @@ class _PoliciasViewState extends State<PoliciasView>  {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                policia['isActive'] == true ? Icons.check_circle : Icons.cancel,
+                                color: policia['isActive'] == true ? Colors.green : Colors.red,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                policia['isActive'] == true ? 'Activo' : 'Inactivo',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: policia['isActive'] == true ? Colors.green : Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () {
+                              final gps = policia['gps'] ?? '';
+                              if (gps.isNotEmpty) {
+                                final url = 'https://www.google.com/maps/search/?api=1&query=$gps';
+                                launchUrl(Uri.parse(url));
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Ubicación no disponible'),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Row(
+                              children: [
+                                Icon(Icons.location_on, color: Colors.green, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Ver en Google Maps',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.green,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
+
                     // Botones de acción
                     Column(
                       children: [

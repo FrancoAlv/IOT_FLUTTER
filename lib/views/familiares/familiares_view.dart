@@ -189,6 +189,25 @@ class _FamiliaresViewState extends State<FamiliaresView> {
                         _buildInfoRow(Icons.email, familiar['correo'] ?? ''),
                         const SizedBox(height: 8),
                         _buildInfoRow(Icons.group, "Relación: ${familiar['relacion'] ?? ''}"),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              familiar['isActive'] == true ? Icons.check_circle : Icons.cancel,
+                              color: familiar['isActive'] == true ? Colors.green : Colors.red,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              familiar['isActive'] == true ? 'Activo' : 'Inactivo',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: familiar['isActive'] == true ? Colors.green : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
                       ],
                     ),
                   ),
