@@ -189,7 +189,7 @@ class _PoliciasAddViewState extends State<PoliciasAddView> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return "El teléfono es obligatorio";
+                      return null;
                     }
                     final phoneRegex = RegExp(r'^\+?[0-9\s]+$');
                     if (!phoneRegex.hasMatch(value)) {

@@ -4,6 +4,7 @@ import 'package:app_iot_web/views/consts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -17,6 +18,9 @@ class _PoliciasViewState extends State<PoliciasView>  {
   List<Map<String, dynamic>> policias = [];
   bool isLoading = false;
   bool isError = false;
+  LatLng selectedLocation = const LatLng(-12.0464, -77.0428); // Ubicación inicial (Lima)
+  double radius = 500; // Radio inicial en metros
+
 
   Future<void> _fetchPolicias() async {
     setState(() {
@@ -132,12 +136,137 @@ class _PoliciasViewState extends State<PoliciasView>  {
     _fetchPolicias();
   }
 
+  void _openLocationModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Dialog(
+              insetPadding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: 300,
+                    width: double.infinity,
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(target: selectedLocation, zoom: 14),
+                      onCameraMove: (position) {
+                        setModalState(() {
+                          selectedLocation = position.target;
+                        });
+                      },
+                      markers: {
+                        Marker(
+                          markerId: const MarkerId('selected-location'),
+                          position: selectedLocation,
+                        )
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Radio: ${radius.toInt()} metros',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Slider(
+                          value: radius,
+                          min: 100,
+                          max: 2000,
+                          divisions: 19,
+                          label: '${radius.toInt()} m',
+                          onChanged: (value) {
+                            setModalState(() {
+                              radius = value;
+                            });
+                          },
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // Cerrar el modal
+                            _buscarComisarias();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                          ),
+                          child: const Text('Buscar Comisarías'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _buscarComisarias() async {
+    setState(() {
+      isLoading = true;
+      isError = false;
+    });
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final url = Uri.parse('${Consts.urlbase}/usuario/${user.uid}/policia/buscar-cercanos');
+
+    final body = {
+      'lat': selectedLocation.latitude,
+      'lng': selectedLocation.longitude,
+      'radius': radius,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+      if (response.statusCode >= 200 && response.statusCode <= 300) {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Comisarías registradas exitosamente')),
+        );
+        _fetchPolicias(); // Recargar la lista de policías
+      } else {
+        setState(() {
+          isError = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isError = true;
+      });
+      print('Exception: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
         title: const Text("Listado de Comisarias"),
         backgroundColor: const Color(0xFF4A90E2),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.location_on),
+              onPressed: _openLocationModal,
+              tooltip: 'Buscar Comisarías Cercanas',
+            ),
+          ],
       ),
       drawer: DawerView(),
       body: isLoading
