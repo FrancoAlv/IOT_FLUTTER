@@ -98,7 +98,7 @@ class _SeguroViewState extends State<SeguroView> {
                       children: [
                         Text(
                           seguro['nombre'] ?? '',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.blueAccent,

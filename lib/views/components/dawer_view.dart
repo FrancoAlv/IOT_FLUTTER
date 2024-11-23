@@ -65,7 +65,7 @@ class DawerView extends StatelessWidget{
           ),
           ListTile(
             leading: const Icon(Icons.local_police),
-            title: const Text('Policías'),
+            title: const Text('Comisarias'),
             onTap: () {
               Navigator.pop(context);
               context.go('/policias');

@@ -23,6 +23,8 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
     if (Consts.keyrouterData != null) {
       notificationMessage = Consts.keyrouterData?['mensaje'] ?? "";
       _accidente_id = checkInt(checkDouble(Consts.keyrouterData?["accidente_id"]?? "0"))!;
@@ -31,6 +33,19 @@ class _ContadorViewState extends State<ContadorView> with TickerProviderStateMix
       startTimer();
       Consts.keyrouterData=null;
     }
+    progress = 1.0;
+    Injector.appInstance.get<IO.Socket>().on("tiempoRestante_$uid",(data) {
+      _timer?.cancel();
+      print("Tiempo restante ${data?["tiempoRestante"]?? "0"}");
+      setState(() {
+        _duration = Duration(seconds: checkInt(data?["tiempoRestante"]?? "0")!);
+        progress = _duration.inSeconds / seconds;
+      });
+    },);
+    Injector.appInstance.get<IO.Socket>().on("tiempoRestante_finish_$uid",(data) {
+      context.go("/");
+    },);
+
   }
 
   double checkDouble(dynamic value) {

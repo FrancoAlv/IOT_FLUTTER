@@ -14,6 +14,7 @@ import 'package:app_iot_web/views/seguro/seguro_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 
 sealed class MainRouter {
@@ -153,15 +154,36 @@ sealed class MainRouter {
           GoRoute(
             path: 'edit',
             builder: (BuildContext context, GoRouterState state) {
-              final nombre = state.extra != null ? (state.extra as Map)['nombre'] : '';
-              final telefono = state.extra != null ? (state.extra as Map)['telefono'] : '';
-              final correo = state.extra != null ? (state.extra as Map)['correo'] : '';
-              final policiaId = state.extra != null ? checkInt((state.extra as Map)['policia_id'] ) ??0: 0;
+              // Obtener valores desde `state.extra`, asegurando tipos y valores predeterminados
+              final Map<String, dynamic> extras = state.extra as Map<String, dynamic>? ?? {};
+              final nombre = extras['nombre'] ?? '';
+              final telefono = extras['telefono'] ?? '';
+              final correo = extras['correo'] ?? '';
+              final isActive = extras['isActive'] ?? false; // Asegurar un valor booleano
+              final gpsString = extras['gps'] ?? '0.0,0.0'; // Cadena de coordenadas
+              final policiaId = extras['policia_id'] != null
+                  ? int.tryParse(extras['policia_id'].toString()) ?? 0
+                  : 0;
+
+              // Transformar el campo `gps` en LatLng
+              final gpsParts = gpsString.split(',');
+              LatLng initialLocation;
+              if (gpsParts.length == 2) {
+                final lat = double.tryParse(gpsParts[0]) ?? 0.0;
+                final lng = double.tryParse(gpsParts[1]) ?? 0.0;
+                initialLocation = LatLng(lat, lng);
+              } else {
+                initialLocation = const LatLng(-12.0464, -77.0428); // Coordenadas predeterminadas
+              }
+
+              // Retornar la vista de edición
               return PoliciasEditView(
                 nombre: nombre,
                 telefono: telefono,
                 correo: correo,
                 policiaID: policiaId,
+                initialActiveState: isActive,
+                initialLocation: initialLocation,
               );
             },
           ),

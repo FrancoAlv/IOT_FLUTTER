@@ -136,7 +136,7 @@ class _PoliciasViewState extends State<PoliciasView>  {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Listado de policías"),
+        title: const Text("Listado de Comisarias"),
         backgroundColor: const Color(0xFF4A90E2),
       ),
       drawer: DawerView(),
@@ -160,8 +160,8 @@ class _PoliciasViewState extends State<PoliciasView>  {
             const SizedBox(height: 16),
             Text(
               isError
-                  ? "Error al cargar los policías."
-                  : "No hay policías disponibles.",
+                  ? "Error al cargar las Comisarias."
+                  : "No hay Comisarias disponibles.",
               style: TextStyle(fontSize: 18, color: Colors.grey[700]),
               textAlign: TextAlign.center,
             ),
@@ -169,7 +169,7 @@ class _PoliciasViewState extends State<PoliciasView>  {
             Text(
               isError
                   ? "Por favor, intenta recargar la lista."
-                  : "Puedes agregar un nuevo policía con el botón de abajo.",
+                  : "Puedes agregar una nueva Comisaria con el botón de abajo.",
               style: TextStyle(fontSize: 14, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
@@ -266,7 +266,7 @@ class _PoliciasViewState extends State<PoliciasView>  {
                         IconButton(
                           icon: Icon(Icons.edit, color: Colors.blue.shade700),
                           onPressed: () => _editPolicia(index),
-                          tooltip: "Editar Policía",
+                          tooltip: "Editar Comisaria",
                         ),
                         const SizedBox(height: 8),
                         InkWell(
@@ -302,7 +302,7 @@ class _PoliciasViewState extends State<PoliciasView>  {
         onPressed: _addPolicia,
         backgroundColor: Colors.blueAccent,
         child: Icon(Icons.add),
-        tooltip: 'Agregar Policía',
+        tooltip: 'Agregar una Comisaria',
       ),
     );
   }
